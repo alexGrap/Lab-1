@@ -24,8 +24,6 @@ class Store:
 class Storage:
     users = {}
     books = {}
-    u_dict = ''
-    s_array = []
 
 
 class User_Manager:
@@ -56,7 +54,6 @@ class User_Manager:
         try:
             with open(f"{f_name}", "r", encoding='utf-8') as u_json:
                 u_dict = json.load(u_json)
-                Storage.u_dict = u_dict
             try:
                 for key, val in u_dict["users"].items():
                     Storage.users[int(key)] = User(int(key), val["name"], val["price"], val["order"], val["type"])
@@ -106,8 +103,7 @@ class User_Manager:
             for el in root:
                 string.append(
                     Store(int(el.tag.split("-")[1]), el[0].text, int(el[2].text), int(el[1].text), float(el[3].text)))
-            Storage.s_array = string
-            for el in Storage.s_array:
+            for el in string:
                 Storage.books[el.id] = el
             print("Book base:")
             for i in range(1, len(Storage.books) + 1):
