@@ -3,6 +3,14 @@ import xml.etree.ElementTree as ET
 import re
 
 
+class IntInStrError(Exception):
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+
+
 class User:
     def __init__(self, id: int, name: str, price: float, order=[], type=[]):
         self.id = id
@@ -29,9 +37,12 @@ class Storage:
 class User_Manager:
 
     def add_new_user(self, f_name):
-        string = input("Enter new user name: ")
-        if (re.findall(r'\d+', string) != []):
-            print("Incorrect input!")
+        try:
+            string = input("Enter new user name: ")
+            if (not string.isalpha()):
+                raise IntInStrError("Incorrect name of user")
+        except IntInStrError as e:
+            print(e)
             return
         Storage.users[len(Storage.users) + 1] = User(len(Storage.users), string, [], [], [])
         User_Manager.set_users(self, f_name)
@@ -49,28 +60,28 @@ class User_Manager:
         User_Manager.set_users(self, f_name)
         User_Manager.get_users(self, f_name)
 
-
     def get_users(self, f_name):
         try:
             with open(f"{f_name}", "r", encoding='utf-8') as u_json:
                 u_dict = json.load(u_json)
-            try:
-                for key, val in u_dict["users"].items():
-                    Storage.users[int(key)] = User(int(key), val["name"], val["price"], val["order"], val["type"])
-            except TypeError:
-                print()
-            print("Users base:")
-            for i in range(1, len(Storage.users) + 1):
-                print(Storage.users.get(i).__dict__)
         except FileNotFoundError:
             print(f"File {f_name} doesn't exist.")
+        try:
+            for key, val in u_dict["users"].items():
+                Storage.users[int(key)] = User(int(key), val["name"], val["price"], val["order"], val["type"])
+        except TypeError:
+            print()
+        print("Users base:")
+        for i in range(1, len(Storage.users) + 1):
+            print(Storage.users.get(i).__dict__)
 
     def set_users(self, f_name):
+
+        data = {}
+        for key, val in Storage.users.items():
+            Storage.users[key] = val.__dict__
+        data["users"] = Storage.users
         try:
-            data = {}
-            for key, val in Storage.users.items():
-                Storage.users[key] = val.__dict__
-            data["users"] = Storage.users
             with open(f_name, "w") as write_file:
                 json.dump(data, write_file, ensure_ascii=False, indent=4)
         except FileNotFoundError:
@@ -95,21 +106,22 @@ class User_Manager:
             print(f"File {f_name} doesn't exist!")
 
     def get_books(self, f_name):
+
+        string = []
+        parser = ET.XMLParser(encoding="utf-8")
         try:
-            string = []
-            parser = ET.XMLParser(encoding="utf-8")
             tree = ET.parse(f_name, parser=parser)
-            root = tree.getroot()
-            for el in root:
-                string.append(
-                    Store(int(el.tag.split("-")[1]), el[0].text, int(el[2].text), int(el[1].text), float(el[3].text)))
-            for el in string:
-                Storage.books[el.id] = el
-            print("Book base:")
-            for i in range(1, len(Storage.books) + 1):
-                print(Storage.books.get(i).__dict__)
         except FileNotFoundError:
             print(f"File {f_name} doesn't exist")
+        root = tree.getroot()
+        for el in root:
+            string.append(
+                Store(int(el.tag.split("-")[1]), el[0].text, int(el[2].text), int(el[1].text), float(el[3].text)))
+        for el in string:
+            Storage.books[el.id] = el
+        print("Book base:")
+        for i in range(1, len(Storage.books) + 1):
+            print(Storage.books.get(i).__dict__)
 
     def set_books(self, f_name):
         data = []
@@ -181,4 +193,3 @@ try:
             print("Incorrect entered case, be attention!")
 except FileNotFoundError:
     print("Files doesn't exist")
-
