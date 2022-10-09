@@ -1,0 +1,26 @@
+{
+    "users": {
+        "1": {
+            "id": 1,
+            "name": "Peter Dincklage",
+            "order": [
+                1
+            ],
+            "type": [
+                2
+            ],
+            "price": 0.0
+        },
+        "2": {
+            "id": 2,
+            "name": "Dick Turpin",
+            "order": [
+                1
+            ],
+            "type": [
+                1
+            ],
+            "price": 0.0
+        }
+    }
+}
