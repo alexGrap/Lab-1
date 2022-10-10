@@ -12,11 +12,10 @@ class IntInStrError(Exception):
 
 
 class User:
-    def __init__(self, id: int, name: str, price: float, order=[], type=[]):
+    def __init__(self, id: int, name: str, price: float, order=[]):
         self.id = id
         self.name = name
         self.order = order
-        self.type = type
         self.price = price
 
 
@@ -49,14 +48,20 @@ class User_Manager:
         User_Manager.get_users(self, f_name)
 
     def make_order(self, f_name):
+        books = []
+        for key, val in Storage.books.items():
+            books.append(val.__dict__)
         try:
-            string = map(list(int, input(
-                "Enter user id, number of book and its type(1: Written, 2: Audio) separated by a space: ").split()))
+            string = list(map(int, input(
+                "Enter user id and number of book separated by a space: ").split()))
         except TypeError:
             print("Incorrect input!")
             return
+        if string[0] < 0 or string[0] > len(Storage.users) or string[1] > len(Storage.books) or string[1] < 0:
+            print("Incorrect input!")
+            return
         Storage.users.get(string[0]).__dict__["order"].append(string[1])
-        Storage.users.get(string[0]).__dict__["type"].append(string[2])
+        Storage.users.get(string[0]).__dict__["price"] += books[string[1] - 1]["price"]
         User_Manager.set_users(self, f_name)
         User_Manager.get_users(self, f_name)
 
@@ -68,7 +73,7 @@ class User_Manager:
             print(f"File {f_name} doesn't exist.")
         try:
             for key, val in u_dict["users"].items():
-                Storage.users[int(key)] = User(int(key), val["name"], val["price"], val["order"], val["type"])
+                Storage.users[int(key)] = User(int(key), val["name"], val["price"], val["order"])
         except TypeError:
             print()
         print("Users base:")
@@ -90,9 +95,6 @@ class User_Manager:
     def add_new_book(self, f_name):
 
         string = input("Enter title, count, type and price separated by space: ").split()
-        if (re.findall(r'\d+', string[0]) != []):
-            print("Incorrect input!")
-            return
         try:
             st = Store(len(Storage.books) + 1, string[0], int(string[2]), int(string[1]), float(string[3]))
         except TypeError:
@@ -156,15 +158,53 @@ class User_Manager:
             user.append(val.__dict__)
         for el in user:
             for book in books:
-                if (book['id'] in el['order']) and (book['count'] > 0) and (
-                        book['type'] == el['type'][el['order'].index(book['id'])]):
+                if (book['id'] in el['order']) and (book['count'] > 0):
                     book['count'] -= 1
-                    el['price'] += book['price']
-                    el['order'].pop(book['id'] - 1)
+                    el['price'] -= book['price']
+                    el['order'].remove(book['id'])
         Manager.set_users(u_name)
         Manager.set_books(b_name)
         Manager.get_users(u_name)
         Manager.get_books(b_name)
+
+    def print_all(self):
+        print("User base:")
+        for key, val in Storage.users.items():
+            print(val.__dict__)
+        print("Book base:")
+        for key, val in Storage.books.items():
+            print(val.__dict__)
+
+    def update_book(self, key, f_name):
+        id = int(input("Enter book id: "))
+        if id > len(Storage.books) or id < 1:
+            print("Incorrect input!")
+            return
+        if key == 1:
+            pr = float(input("Entered new price: "))
+            if pr < 0:
+                print("Incorrect input!")
+                return
+            val = Storage.books[id].__dict__
+            val["price"] = pr
+        elif key == 2:
+            typ = int(input("Enter new type: "))
+            if typ < 0 or type > 2:
+                print("Incorrect input!")
+                return
+            val = Storage.books[id].__dict__
+            val["type"] = typ
+        elif key == 3:
+            cou = int(input("Enter new type: "))
+            if cou < 0:
+                print("Incorrect input!")
+                return
+            val = Storage.books[id].__dict__
+            val["count"] = cou
+        else:
+            print("Incorrect input!")
+        Manager.set_books(f_name)
+        Manager.get_books(f_name)
 
 
 Manager = User_Manager()
@@ -175,7 +215,7 @@ try:
     Manager.get_books(store_name)
     while True:
         n = int(input(
-            "Choose your way:\n1. Add new user;\n2. Add new order for exist user;\n3. Add new book;\n4. Make all posible orders;\n5. Finish working.\n"))
+            "Choose your way:\n1. Add new user;\n2. Add new order for exist user;\n3. Add new book;\n4. Make all posible orders;\n5. Finish working;\n6. Print all base;\n7. Update book information.\n"))
         if n == 1:
             Manager.add_new_user(user_name)
         elif n == 2:
@@ -189,6 +229,11 @@ try:
             Manager.set_books(store_name)
             print("Thanks for your work!")
             exit(0)
+        elif n == 6:
+            Manager.print_all()
+        elif n == 7:
+            m = int(input("Choose mode: \n1. Change price;\n2. Change type; \n3. Change count:\n"))
+            Manager.update_book(m, store_name)
         else:
             print("Incorrect entered case, be attention!")
 except FileNotFoundError:
