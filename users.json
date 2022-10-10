@@ -3,23 +3,13 @@
         "1": {
             "id": 1,
             "name": "Peter Dincklage",
-            "order": [
-                1
-            ],
-            "type": [
-                2
-            ],
+            "order": [],
             "price": 0.0
         },
         "2": {
             "id": 2,
             "name": "Dick Turpin",
-            "order": [
-                1
-            ],
-            "type": [
-                1
-            ],
+            "order": [],
             "price": 0.0
         }
     }
