@@ -43,7 +43,7 @@ class User_Manager:
         except IntInStrError as e:
             print(e)
             return
-        Storage.users[len(Storage.users) + 1] = User(len(Storage.users), string, [], [], [])
+        Storage.users[len(Storage.users) + 1] = User(len(Storage.users), string, 0.0, [])
         User_Manager.set_users(self, f_name)
         User_Manager.get_users(self, f_name)
 
